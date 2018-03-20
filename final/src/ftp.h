@@ -26,6 +26,8 @@ typedef struct __attribute__ ((packed))
 		char arg[MAXARG];		/* 255 bytes : [cmd message] */
 } packet_t;
 
+/* returns a generic TCP socket with custum options for debugging */
+int setsocket(void);
 /* creates a listening socket to be used for incomming connections */
 int listensocket(int);
 /* sends cmd defined in packet */

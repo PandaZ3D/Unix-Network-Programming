@@ -37,8 +37,7 @@ int main(int argc, char** argv)
 	socklen_t serverlen = sizeof server_addr;
 	
 	/* client opens up both command channel socket and data socket */
-	int cmdsockfd = socket(AF_INET, SOCK_STREAM, 0);
-		error(cmdsockfd, "client: main(): socket()");
+	int cmdsockfd = setsocket();
 	/* open data socket that will listen for server's connection */
 	int datasockfd = listensocket(portno);
 	
