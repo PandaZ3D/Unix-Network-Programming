@@ -1,0 +1,11 @@
+
+	protocols commands implemented:
+	
+		* LIST filename 
+		* ABOR
+		* PORT n1,n2,n3,n4,n5,n6
+		* QUIT
+		* RETR filename 
+		* STOR filename
+
+	custom protocol commands:
