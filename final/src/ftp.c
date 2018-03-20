@@ -25,7 +25,7 @@ int listensocket(int portno)
 	bzero((char*) &my_addr, sizeof my_addr);
 	my_addr.sin_family = AF_INET;
 	my_addr.sin_port = htons(portno);
-	my_addr.sin_family = inet_addr(INADDR_ANY);
+	my_addr.sin_addr.s_addr = htonl(INADDR_ANY);
 	socklen_t addrlen = sizeof my_addr;
 	
 	/*  set listeneing options */

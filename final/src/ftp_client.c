@@ -33,7 +33,7 @@ int main(int argc, char** argv)
 	bzero((char*) &server_addr, sizeof server_addr);
 	server_addr.sin_family = AF_INET;
 	server_addr.sin_port = htons(portno);
-	server_addr.sin_family = inet_addr(argv[IP]);
+	server_addr.sin_addr.s_addr = inet_addr(argv[IP]);
 	socklen_t serverlen = sizeof server_addr;
 	
 	/* client opens up both command channel socket and data socket */
@@ -44,6 +44,21 @@ int main(int argc, char** argv)
 	/* main part of program where client contacts server */
 	int status = connect(cmdsockfd, (struct sockaddr*) &server_addr, serverlen);
 		error(status, "client: main(): connect()");
+	
+	/**************** TESTNG *************************/
+	char buf[20];
+	int bytes = sprintf(buf, "hi");
+	buf[bytes] = 0;
+	
+	bytes = write(cmdsockfd, buf, bytes + 1);
+		error(bytes, "write()");
+
+	bytes = read(cmdsockfd, buf, 20);
+		error(bytes, "write()");
+		
+	buf[bytes] = 0;
+	printf("recvd: %s\n", buf);
+	/************************************************/
 	
 	/* create PORT packet and sent IP:PORT to server */
 	
