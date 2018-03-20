@@ -4,16 +4,15 @@
 # CE156 - asgn-3
 # Parsa
 #------------------------------------------------------------------------------
-# Makefile for ftp server
+# Makefile for ftp client and server
 #------------------------------------------------------------------------------
-SERVER = ftpcli
-CLIENT = ftpser
+SERVER = ftp_client
+CLIENT = ftp_server
 
 CC = gcc
 CFLAGS = -Wall
 
 FTPF = ftp
-LIB = pkt
 
 DEV = -Wno-unused-variable
 
