@@ -11,10 +11,8 @@ CLIENT = ftpser
 
 CC = gcc
 CFLAGS = -Wall
-# LFLAGS = 
 
 FTPF = ftp
-
 LIB = pkt
 
 DEV = -Wno-unused-variable
@@ -26,22 +24,15 @@ $(CLIENT) : src/$(CLIENT).o
 
 src/$(CLIENT).o : src/$(FTPF).o
 	$(CC) -c $(CFLAGS) src/$(CLIENT).c $(DEV) -o $@
-
-src/$(FTPF).o :
-	$(CC) -c $(CFLAGS) src/$(FTPF).c -o $@
-
-src/$(ADT).o :
-	$(CC) -c $(CFLAGS) src/$(ADT).c  -o $@
-
 #----------------------------------------------------------------------------
 $(SERVER) : src/$(SERVER).o
 	$(CC) -o bin/$(SERVER) src/$(SERVF).o src/$(SERVER).o
 
-src/$(SERVER).o : src/$(SERVF).o
+src/$(SERVER).o : src/$(FTPF).o
 	$(CC) -c $(CFLAGS) src/$(SERVER).c -o $@
-
-src/$(SERVF).o :
-	$(CC) -c $(CFLAGS) src/$(SERVF).c -o $@
+#----------------------------------------------------------------------------
+src/$(FTPF).o :
+	$(CC) -c $(CFLAGS) src/$(FTPF).c -o $@
 #----------------------------------------------------------------------------
 check :
 	valgrind --leak-check=full bin/$(SERVER)
