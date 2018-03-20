@@ -11,6 +11,7 @@ CLIENT = ftp_server
 
 CC = gcc
 CFLAGS = -Wall
+LFLAGS = -lreadline
 
 FTPF = ftp
 

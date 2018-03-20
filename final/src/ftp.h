@@ -4,8 +4,10 @@
 
 #include "netlib.h"
 
-#define USAGE		"ftp> <client-cmd> [<cmd-arg>]"
-#define UTERM		"ftp>"
+#define USAGE		"ftp> <client-cmd> [<cmd-arg>]" 	/* 29 bytes long */
+#define UTERM		"ftp>" 											/* 4 bytes long */
+
+#define ULEN	29 /* length of usage string is 29 bytes */
 
 /* max payload recieved from a chunk of a file */
 #define MAXPAY	512
