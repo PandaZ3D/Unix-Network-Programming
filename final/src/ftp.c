@@ -1,13 +1,4 @@
-#include "fat.h"
-
-/* packet structure definition */
-struct packet_t 
-{
-		char cmd[CMDLEN]; 		/* 4 bytes		: cmd */
-		uint8_t status;				/* 1 byte 		: [reply status code] */
-		uint8_t arglen;				/* 1 byte 		: [length of args] */
-		char arg[MAXARG];		/* 255 bytes : [cmd message] */
-} __attribute__ ((packed));
+#include "ftp.h"
 
 /* creates a listening socket to be used for incomming connections */
 int listensocket(int socketfd)
@@ -16,12 +7,12 @@ int listensocket(int socketfd)
 }
 
 /* sends cmd defined in packet */
-void sendcmd(int socketfd, pkt cmd)
+void sendcmd(int socketfd, packet_t* cmd)
 {
 	
 }
 /* returns packet buffered in socket */
-pkt recvcmd(int)
+packet_t* recvcmd(int socketfd)
 {
 	return NULL;
 }

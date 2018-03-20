@@ -15,14 +15,21 @@
 #define MAXARG	255 	/* max length of args */
 #define PKTSIZE	(2 + (CMDLEN) + (MAXARG))
 
-typedef struct packet_t* pkt;
+/* packet structure definition */
+typedef struct __attribute__ ((packed)) 
+{
+		char cmd[CMDLEN]; 		/* 4 bytes		: cmd */
+		uint8_t status;				/* 1 byte 		: [reply status code] */
+		uint8_t arglen;				/* 1 byte 		: [length of args] */
+		char arg[MAXARG];		/* 255 bytes : [cmd message] */
+} packet_t;
 
 /* creates a listening socket to be used for incomming connections */
 int listensocket(int);
 /* sends cmd defined in packet */
-void sendcmd(int, pkt);
+void sendcmd(int, packet_t*);
 /* returns packet buffered in socket */
-pkt recvcmd(int);
+packet_t* recvcmd(int);
 /* sends a chunk of data, returns amount of bytes sent */
 int sendchunk(int, char*);
 /* recieves a chunk of data, returns pointer to chunk */
