@@ -19,13 +19,13 @@ DEV = -Wno-unused-variable
 all : $(CLIENT) $(SERVER)
 #-----------------------------------------------------------------------------
 $(CLIENT) : src/$(CLIENT).o
-	$(CC) -o bin/$(CLIENT) src/$(ADT).o src/$(CLIF).o src/$(CLIENT).o $(LFLAGS)
+	$(CC) -o bin/$(CLIENT)  src/$(FTPF).o src/$(CLIENT).o $(LFLAGS)
 
 src/$(CLIENT).o : src/$(FTPF).o
 	$(CC) -c $(CFLAGS) src/$(CLIENT).c $(DEV) -o $@
 #----------------------------------------------------------------------------
 $(SERVER) : src/$(SERVER).o
-	$(CC) -o bin/$(SERVER) src/$(SERVF).o src/$(SERVER).o
+	$(CC) -o bin/$(SERVER) src/$(FTPF).o src/$(SERVER).o
 
 src/$(SERVER).o : src/$(FTPF).o
 	$(CC) -c $(CFLAGS) src/$(SERVER).c -o $@
