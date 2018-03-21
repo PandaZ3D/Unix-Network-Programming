@@ -72,11 +72,22 @@ packet_t* cmdpkt(int socketfd, char* cmd, char* args, uint8_t arglen, uint8_t st
 		n[4] = (port / 256) & 0xFF;
 		n[5] = (port % 256) & 0xFF;
 		
+		/* wierd bug only works with this loop calling printf */
 		int i;
 		for(i = 0; i<6; i++) {
-			printf("%d ", n[i]);
+			printf("");
 		}
-		printf("\n");
+		printf("");
+		
+		/* tried to flush stdout */
+		/*status = fflush(stdout);
+		if(status != 0)
+		{
+			fprintf(stderr, "error on fflush()\n");
+			exit(EXIT_FAILURE);
+		}
+		usleep(1000);
+		*/
 		
 		char buf[ADDRLEN + 1];
 		uint8_t bytes = sprintf(buf, "%d,%d,%d,%d,%d,%d",
@@ -158,7 +169,7 @@ int recvfile(int socketfd)
 /* function to do port calculation, returns struct with info */
 struct sockaddr_in* parseport(packet_t* P)
 {
-	//struct sockaddr_in* new_addr = malloc(sizeof(struct sockaddr_in));
+	struct sockaddr_in* new_addr = malloc(sizeof(struct sockaddr_in));
 	char* info = strndup(P->arg, strnlen(P->arg, MAXARG));
 	char *tok;
 	uint8_t n[6] , i = 0;
@@ -170,22 +181,27 @@ struct sockaddr_in* parseport(packet_t* P)
 	
 	for(i = 0; i<6; i++)
 	{
-		printf("%d ", n[i]);
+		printf("", n[i]);
 	}
-	printf("\n");
+	printf("");
 	
 	/* ip conversion works */
 	uint16_t port = 0;
 	uint32_t ip = 0;
 	
+	/* numbers are sent and recvd in Network Byte Order */
 	ip |= (n[0] << 24);
 	ip |= (n[1] << 16);
 	ip |= (n[2] << 16);
 	ip |= n[3];
-	port = (256 * n[4]) + n[5];
+	port += (256 * n[4]) + n[5];
 	
+	/* make the client address */
+	new_addr->sin_family = AF_INET;
+	new_addr->sin_port=  port;
+	new_addr->sin_addr.s_addr = ip;
 	
-	return NULL;
+	return new_addr;
 }
 
 /* frees allocated packet struct */

@@ -39,7 +39,7 @@ int main(int argc, char** argv)
 	/* client opens up both command channel socket and data socket */
 	int cmdsockfd = setsocket();
 	/* open data socket that will listen for server's connection */
-	int datasockfd = listensocket(INADDR_ANY);
+	int serverfd = listensocket(INADDR_ANY);
 	
 	/* main part of program where client contacts server */
 	int status = connect(cmdsockfd, (struct sockaddr*) &server_addr, serverlen);
@@ -47,11 +47,19 @@ int main(int argc, char** argv)
 	
 	/**************** TESTNG *************************/
 	/* client now gets their ip and port information to send to the server */
-	packet_t* P = cmdpkt(datasockfd, "PORT", NULL, 0, 0);
-	printpkt(P);
+	packet_t* P = cmdpkt(serverfd, "PORT", NULL, 0, 0);
+	
 	/* client sends PORT packet to initialize connection */
 	sendcmd(cmdsockfd, P);
-
+		free(P);
+		
+	/* client now waits for server's connection to thier data port */
+	bzero((char*) &server_addr, sizeof server_addr);
+	socklen_t serverlen = sizeof server_addr;
+	int datasockfd = accept(datasockfd, (struct sockaddr*) &server_addr, serverlen);
+		error(datasockfd, "client: main(): accept()");
+	
+	printf("recv'd server connection\n");
 	/************************************************/
 	
 	/* create PORT packet and sent IP:PORT to server */

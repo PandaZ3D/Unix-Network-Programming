@@ -21,17 +21,9 @@ int main(int argc, char** argv)
 		exit(EXIT_FAILURE);
 	}
 	
+	int status, datasockfd;
 	/* get the server port number of server */
 	int portno = atoi(argv[PORT]);
-
-	/* set up server IP information
-	struct sockaddr_in server_addr;
-	bzero((char*) &server_addr, sizeof server_addr);
-	server_addr.sin_family = AF_INET;
-	server_addr.sin_port = htons(portno);
-	server_addr.sin_addr.s_addr = inet_addr(INADDR_ANY);
-	socklen_t serverlen = sizeof server_addr;
-	*/
 	
 	/* client opens up both command channel socket and data socket */
 	int cmdsockfd = listensocket(portno);
@@ -40,12 +32,23 @@ int main(int argc, char** argv)
 	struct sockaddr_in client_addr;
 	socklen_t clientlen = sizeof client_addr;
 	
+	/* start of communication loop */
 	int newclientfd = accept(cmdsockfd, (struct sockaddr*) &client_addr, &clientlen);
-	
-    /**************** TESTNG *************************/
+		error(newclientfd, "server: main(): accept()");
+	/* now we fork for concurrency */
+	/**************** TESTNG *************************/
 	packet_t* P = recvcmd(newclientfd);
 	printpkt(P);
-	parseport(P);
+	/* get client IP and port info */
+	struct sockaddr_in* clientdata = parseport(P);
+	clientlen = sizeof(clientdata);
+	/* create socket to send client data */
+	datasockfd = setsocket();
+	/* connect to client */
+	status = connect(datasockfd, (struct sockaddr*) clientdata, clientlen);
+		error(status, "server: main(): connect()");
+	printf("server connected!");
+	/* we now begin the process of the file transfer */
 	/************************************************/
 	
 	close(cmdsockfd);
