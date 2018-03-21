@@ -42,10 +42,10 @@ int listensocket(int portno)
 
 
 /* creates packet based on arguments */
-packet_t* cmdpkt(int socketfd, char* cmd, char* args, uint8_t status, uint8_t arglen)
+packet_t* cmdpkt(int socketfd, char* cmd, char* args, uint8_t arglen, uint8_t status)
 {
 	/* note that commands sent are not NULL teminated */
-	packet_t* cmd = malloc(sizeof(packet_t));
+	packet_t* P = malloc(sizeof(packet_t));
 	if(cmd == NULL)
 	{
 		fprintf(stderr, "cmdpkt(): malloc failed\n");
@@ -60,44 +60,74 @@ packet_t* cmdpkt(int socketfd, char* cmd, char* args, uint8_t status, uint8_t ar
 		socklen_t len = 0;
 		int status  = getsockname(socketfd, (struct sockaddr*) &my_addr, &len);
 			error(status, "cmdpkt: getsockname()");
-			
-		uint8_t n[6];
-		n[0] = (my_addr.sin_addr.s_addr >> 24) & 0xFF;
-		n[1] = (my_addr.sin_addr.s_addr >> 16) & 0xFF;
-		n[2] = (my_addr.sin_addr.s_addr >> 8) & 0xFF;
-		n[3] = my_addr.sin_addr.s_addr & 0xFF;
-		n[4] = (my_addr.sin_port / 256) & 0xFF;
-		n[5] = (my_addr.sin_port % 256) & 0xFF;
 		
-		printf("port = %d\n", ntohs(my_addr.sin_port));
-		for(int i = 0; i<6; i++) {
-			printf("%d ", n[1]);
+		uint16_t port = htons(my_addr.sin_port);
+		uint32_t ip = htonl(my_addr.sin_addr.s_addr);
+		
+		uint8_t n[6];
+		n[0] = (ip >> 24) & 0xFF;
+		n[1] = (ip >> 16) & 0xFF;
+		n[2] = (ip >> 8) & 0xFF;
+		n[3] = ip & 0xFF;
+		n[4] = (port / 256) & 0xFF;
+		n[5] = (port % 256) & 0xFF;
+		
+		int i;
+		for(i = 0; i<6; i++) {
+			printf("%d ", n[i]);
 		}
 		printf("\n");
 		
-		memcpy(cmd->cmd, cmd, CMDLEN);
+		char buf[ADDRLEN + 1];
+		uint8_t bytes = sprintf(buf, "%d,%d,%d,%d,%d,%d",
+							n[0], n[1], n[2], n[3], n[4], n[5]);
+							
+		memcpy(P->cmd, cmd, CMDLEN);
+		memcpy(&P->arglen, &bytes, 1);
+		memcpy(P->arg, buf, bytes);
+		/* NULL terminate if possible */
+		int left = MAXARG - bytes;
+		memset(P->arg + left, 0, left);
 	}
 	
 	/* genericc packet assignments */
-	memcpy(&cmd->status, &status, 1);
-	memcpy(&cmd->arglen, &arglen, 1);
-	memcpy(cmd->args, args, arglen);
-	/* NULL terminate if possible */
-	int left = MAXARG - arglen;
-	memset(cmd->args + left, 0, left);
-	
-	return cmd;
+	memcpy(&P->status, &status, 1);
+	if(args != NULL)
+	{
+		memcpy(&P->arglen, &arglen, 1);
+		memcpy(P->arg, args, arglen);
+		/* NULL terminate if possible */
+		int left = MAXARG - arglen;
+		memset(P->arg + left, 0, left);
+	}
+	return P;
 }
 
 /* sends cmd defined in packet */
 void sendcmd(int socketfd, packet_t* cmd)
 {
-	
+	int expected = sizeof(packet_t);
+	int bytes = 0, sent = 0;
+	do {
+		bytes = write(socketfd, cmd, sizeof(packet_t));
+			error(bytes, "sendcmd(): write()");
+		sent += bytes;
+	} while(sent < expected && bytes > 0);
 }
+
 /* returns packet buffered in socket */
 packet_t* recvcmd(int socketfd)
 {
-	return NULL;
+	packet_t* P = malloc(sizeof(packet_t));
+	int expected = sizeof(packet_t);
+	int recv = 0, bytes = 0;
+	do {
+		bytes = read(socketfd, P, sizeof(packet_t));
+			error(bytes, "sendcmd(): write()");
+		recv += bytes;
+	} while(recv < expected && bytes > 0);
+	
+	return P;
 }
 
 /* sends a chunk of data, returns amount of bytes sent */
@@ -124,6 +154,50 @@ int recvfile(int socketfd)
 		return 0;
 }
 
+
+/* function to do port calculation, returns struct with info */
+struct sockaddr_in* parseport(packet_t* P)
+{
+	//struct sockaddr_in* new_addr = malloc(sizeof(struct sockaddr_in));
+	char* info = strndup(P->arg, strnlen(P->arg, MAXARG));
+	char *tok;
+	uint8_t n[6] , i = 0;
+	
+	tok = strtok(info, ",");
+	do{
+		n[i] = atoi(tok);
+	} while (((tok = strtok(NULL, ",")) != NULL) && i++ < 6);
+	
+	for(i = 0; i<6; i++)
+	{
+		printf("%d ", n[i]);
+	}
+	printf("\n");
+	
+	/* ip conversion works */
+	uint16_t port = 0;
+	uint32_t ip = 0;
+	
+	ip |= (n[0] << 24);
+	ip |= (n[1] << 16);
+	ip |= (n[2] << 16);
+	ip |= n[3];
+	port = (256 * n[4]) + n[5];
+	
+	
+	return NULL;
+}
+
+/* frees allocated packet struct */
+void freepkt(packet_t* P)
+{
+	if(P != NULL)
+	{
+		free(P);
+		P = NULL;
+	}
+}
+
 /* generic printf funciton for packets */
 void printpkt(packet_t* P)
 {
@@ -131,7 +205,8 @@ void printpkt(packet_t* P)
 	buf[CMDLEN] = 0;
 	memcpy(buf, P->cmd, CMDLEN);
 	printf("%s: ", buf);
-	printf("%d ", P->status);
+	if(P->status)
+		printf("%d ", P->status);
 	if(P->arglen)
 	{
 		char* arg = strndup(P->arg, P->arglen);

@@ -43,21 +43,12 @@ int main(int argc, char** argv)
 	int newclientfd = accept(cmdsockfd, (struct sockaddr*) &client_addr, &clientlen);
 	
     /**************** TESTNG *************************/
-	char buf[20], buf2[20];
-	int byte = sprintf(buf2, "hello");
-	buf2[byte] = 0;
-		
-	int bytes = read(newclientfd, buf, 20);
-		error(bytes, "read()");
-		
-	buf[bytes] = 0;
-	printf("recvd: %s\n", buf);
-	
-	bytes = write(newclientfd, buf2, byte);
-		error(bytes, "write()");
-	
+	packet_t* P = recvcmd(newclientfd);
+	printpkt(P);
+	parseport(P);
 	/************************************************/
 	
 	close(cmdsockfd);
+	close(newclientfd);
 	return EXIT_SUCCESS;
 }

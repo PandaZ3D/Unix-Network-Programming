@@ -44,7 +44,11 @@ char* recvchunk(int);
 int sendfile(int, int); 
 /* recieves a whole file, returns bytes recvd */
 int recvfile(int);
-
+/* function to do port calculation, returns struct with info */
+struct sockaddr_in* parseport(packet_t*);
+/* frees allocated packet struct */
+void freepkt(packet_t*);
+/* generic printf funciton for packets */
 void printpkt(packet_t*);
  
 #endif

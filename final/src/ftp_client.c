@@ -47,6 +47,11 @@ int main(int argc, char** argv)
 	
 	/**************** TESTNG *************************/
 	/* client now gets their ip and port information to send to the server */
+	packet_t* P = cmdpkt(datasockfd, "PORT", NULL, 0, 0);
+	printpkt(P);
+	/* client sends PORT packet to initialize connection */
+	sendcmd(cmdsockfd, P);
+
 	/************************************************/
 	
 	/* create PORT packet and sent IP:PORT to server */
