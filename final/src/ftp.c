@@ -61,8 +61,10 @@ packet_t* cmdpkt(int socketfd, char* cmd, char* args, uint8_t arglen, uint8_t st
 		int status  = getsockname(socketfd, (struct sockaddr*) &my_addr, &len);
 			error(status, "cmdpkt: getsockname()");
 		
-		uint16_t port = htons(my_addr.sin_port);
-		uint32_t ip = htonl(my_addr.sin_addr.s_addr);
+		printf("%s %d %d\n", inet_ntoa(my_addr.sin_addr), ntohs(my_addr.sin_port), len);
+		
+		uint16_t port = ntohs(my_addr.sin_port);
+		uint32_t ip = ntohl(my_addr.sin_addr.s_addr);
 		
 		uint8_t n[6];
 		n[0] = (ip >> 24) & 0xFF;
@@ -170,6 +172,7 @@ int recvfile(int socketfd)
 socklen_t parseport(packet_t* P, struct sockaddr_in* ret_addr)
 {
 	struct sockaddr_in new_addr;
+	bzero((char*) &new_addr, sizeof new_addr);
 	char* info = strndup(P->arg, strnlen(P->arg, MAXARG));
 	char *tok;
 	uint8_t n[6] , i = 0;
@@ -198,12 +201,13 @@ socklen_t parseport(packet_t* P, struct sockaddr_in* ret_addr)
 	
 	/* make the client address */
 	new_addr.sin_family = AF_INET;
-	new_addr.sin_port=  port;
-	new_addr.sin_addr.s_addr = ip;
+	new_addr.sin_port=  htons(port);
+	new_addr.sin_addr.s_addr = htonl(ip);
 	
 	socklen_t len = sizeof new_addr;
 	memcpy(ret_addr, &new_addr, len);
 	
+	printf("%s %d %d\n", inet_ntoa(new_addr.sin_addr), ntohs(new_addr.sin_port), len);
 	return len;
 }
 

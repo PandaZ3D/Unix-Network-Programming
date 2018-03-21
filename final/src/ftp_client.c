@@ -38,8 +38,9 @@ int main(int argc, char** argv)
 	
 	/* client opens up both command channel socket and data socket */
 	int cmdsockfd = setsocket();
+	
 	/* open data socket that will listen for server's connection */
-	int serverfd = listensocket(INADDR_ANY);
+	int serverfd = listensocket(16384);
 	
 	/* main part of program where client contacts server */
 	int status = connect(cmdsockfd, (struct sockaddr*) &server_addr, serverlen);
@@ -56,6 +57,7 @@ int main(int argc, char** argv)
 	printf("Waiting for server\n");
 	bzero((char*) &server_addr, sizeof server_addr);
 	serverlen = sizeof server_addr;
+	
 	int datasockfd = accept(serverfd, (struct sockaddr*) &server_addr, &serverlen);
 		error(datasockfd, "client: main(): accept()");
 	

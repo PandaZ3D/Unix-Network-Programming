@@ -40,14 +40,15 @@ int main(int argc, char** argv)
 	packet_t* P = recvcmd(newclientfd);
 	printpkt(P);
 	/* get client IP and port info */
-	struct sockaddr_in* clientdata = malloc(sizeof(struct sockaddr_in));
-	clientlen	= parseport(P, clientdata);
-	
+	struct sockaddr_in clientdata;
+	bzero((char*) &clientdata, sizeof clientdata);
+	clientlen	= parseport(P, &clientdata);
+	printf("%s %d %d\n", inet_ntoa(clientdata.sin_addr), ntohs(clientdata.sin_port), clientlen);
 	/* create socket to send client data */
 	datasockfd = setsocket();
 	/* connect to client */
 	printf("Trying to connect to client\n");
-	status = connect(datasockfd, (struct sockaddr*) clientdata, clientlen);
+	status = connect(datasockfd, (struct sockaddr*) &clientdata, clientlen);
 		error(status, "server: main(): connect()");
 	printf("server connected!");
 	/* we now begin the process of the file transfer */
