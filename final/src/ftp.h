@@ -30,6 +30,8 @@ typedef struct __attribute__ ((packed))
 int setsocket(void);
 /* creates a listening socket to be used for incomming connections */
 int listensocket(int);
+/* creates packet based on arguments */
+packet_t* cmdpkt(int, char*, char*, uint8_t, uint8_t);
 /* sends cmd defined in packet */
 void sendcmd(int, packet_t*);
 /* returns packet buffered in socket */
@@ -41,6 +43,8 @@ char* recvchunk(int);
 /* sends a whole file, returns bytes sent */
 int sendfile(int, int); 
 /* recieves a whole file, returns bytes recvd */
-int recvfile(int); 
+int recvfile(int);
 
+void printpkt(packet_t*);
+ 
 #endif

@@ -40,6 +40,55 @@ int listensocket(int portno)
 	return listenfd;
 }
 
+
+/* creates packet based on arguments */
+packet_t* cmdpkt(int socketfd, char* cmd, char* args, uint8_t status, uint8_t arglen)
+{
+	/* note that commands sent are not NULL teminated */
+	packet_t* cmd = malloc(sizeof(packet_t));
+	if(cmd == NULL)
+	{
+		fprintf(stderr, "cmdpkt(): malloc failed\n");
+		exit(EXIT_FAILURE);
+	}
+	
+	/* create PORT cmd to send */
+	if(socketfd != 0)
+	{
+		/* get IP & Port Info */
+		struct sockaddr_in my_addr;
+		socklen_t len = 0;
+		int status  = getsockname(socketfd, (struct sockaddr*) &my_addr, &len);
+			error(status, "cmdpkt: getsockname()");
+			
+		uint8_t n[6];
+		n[0] = (my_addr.sin_addr.s_addr >> 24) & 0xFF;
+		n[1] = (my_addr.sin_addr.s_addr >> 16) & 0xFF;
+		n[2] = (my_addr.sin_addr.s_addr >> 8) & 0xFF;
+		n[3] = my_addr.sin_addr.s_addr & 0xFF;
+		n[4] = (my_addr.sin_port / 256) & 0xFF;
+		n[5] = (my_addr.sin_port % 256) & 0xFF;
+		
+		printf("port = %d\n", ntohs(my_addr.sin_port));
+		for(int i = 0; i<6; i++) {
+			printf("%d ", n[1]);
+		}
+		printf("\n");
+		
+		memcpy(cmd->cmd, cmd, CMDLEN);
+	}
+	
+	/* genericc packet assignments */
+	memcpy(&cmd->status, &status, 1);
+	memcpy(&cmd->arglen, &arglen, 1);
+	memcpy(cmd->args, args, arglen);
+	/* NULL terminate if possible */
+	int left = MAXARG - arglen;
+	memset(cmd->args + left, 0, left);
+	
+	return cmd;
+}
+
 /* sends cmd defined in packet */
 void sendcmd(int socketfd, packet_t* cmd)
 {
@@ -73,4 +122,21 @@ int sendfile(int socketfd, int putfd)
 int recvfile(int socketfd)
 {
 		return 0;
+}
+
+/* generic printf funciton for packets */
+void printpkt(packet_t* P)
+{
+	char buf[CMDLEN + 1];
+	buf[CMDLEN] = 0;
+	memcpy(buf, P->cmd, CMDLEN);
+	printf("%s: ", buf);
+	printf("%d ", P->status);
+	if(P->arglen)
+	{
+		char* arg = strndup(P->arg, P->arglen);
+		printf("%s", arg);
+		free(arg);
+	}
+	printf("\n");
 }

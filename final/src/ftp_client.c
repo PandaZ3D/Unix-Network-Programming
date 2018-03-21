@@ -46,21 +46,7 @@ int main(int argc, char** argv)
 		error(status, "client: main(): connect()");
 	
 	/**************** TESTNG *************************/
-	char buf[20];
-	int bytes = sprintf(buf, "hi");
-	buf[bytes] = 0;
-	
-	bytes = write(cmdsockfd, buf, bytes + 1);
-		error(bytes, "write()");
-	
-	do{	
-	bytes = read(cmdsockfd, buf, 20);
-		error(bytes, "write()");
-		
-	buf[bytes] = 0;
-	printf("recvd: %s\n", buf);
-	
-	}while(bytes>0);
+	/* client now gets their ip and port information to send to the server */
 	/************************************************/
 	
 	/* create PORT packet and sent IP:PORT to server */
