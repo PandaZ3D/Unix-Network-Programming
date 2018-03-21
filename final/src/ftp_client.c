@@ -46,25 +46,90 @@ int main(int argc, char** argv)
 	int status = connect(cmdsockfd, (struct sockaddr*) &server_addr, serverlen);
 		error(status, "client: main(): connect()");
 	
-	/**************** TESTNG *************************/
 	/* client now gets their ip and port information to send to the server */
 	packet_t* P = cmdpkt(serverfd, "PORT", NULL, 0, 0);
 	
 	/* client sends PORT packet to initialize connection */
 	sendcmd(cmdsockfd, P);
-		
+	
+	/* wait for ok from server */
+	packet_t* R = recvcmd(cmdsockfd);
+	
+	/* check if it is okay to continue */
+	if(R->status != 200)
+	{
+		fprintf(stderr, "%s", R->arg);
+		exit(1);
+	}
+	
 	/* client now waits for server's connection to thier data port */
-	printf("Waiting for server\n");
 	bzero((char*) &server_addr, sizeof server_addr);
 	serverlen = sizeof server_addr;
 	
 	int datasockfd = accept(serverfd, (struct sockaddr*) &server_addr, &serverlen);
 		error(datasockfd, "client: main(): accept()");
 	
-	printf("recv'd server connection\n");
-	/************************************************/
+	/* now we put up our interface and start the application */
+	char *input, prompt[5];
+	snprintf(prompt, sizeof prompt, UTERM);
 	
-	/* create PORT packet and sent IP:PORT to server */
+	while(TRUE)
+	{
+		/* Show prompt and read input */
+		input = readline(prompt);
+		
+		/* Check for EOF */
+		if (input == NULL)
+		{
+			printf("\n");
+			break;
+		}
+		
+		/* Add input to history */
+		add_history(input);
+		
+		if(strcmp(input, "clear") == 0)
+		{
+			system(input);
+			continue;
+		}
+		
+		/* check if there is a valid command */
+		if(strcmp(input, "quit") == 0)
+		{
+			/* create a QUIT packet and send it to the server to close connections */
+			P = cmdpkt(cmdsockfd, "QUIT", NULL, 0, 0);
+			sendcmd(cmdsockfd, P);
+			break;
+		} 
+		else if(strncmp(input, "ls", 2) == 0)
+		{
+			printf("found ls\n");
+			/* send list cmd */
+			P = cmdpkt(0, "LIST", input, strlen(input), 0);
+			sendcmd(cmdsockfd, P);
+		}
+		else
+		{
+				/* cmd not supported */
+				
+		}
+		/**************** TESTNG *************************/
+		/* wait to recieve okay or error */
+		P = recvcmd(cmdsockfd);
+		
+		/* check if it is okay to continue */
+		if(R->status != 200)
+		{
+			fprintf(stderr, "%s", R->arg);
+			exit(1);
+		}
+		
+		/************************************************/
+		/* Free dynamically memory */
+		free(input);	
+	}
+	
 	
 	close(datasockfd);
 	close(cmdsockfd);

@@ -5,7 +5,7 @@
 #include "netlib.h"
 
 #define USAGE	"ftp> <client-cmd> [<cmd-arg>]" 	/* 29 bytes long */
-#define UTERM	"ftp>" 					/* 4 bytes long */
+#define UTERM	("ftp> ") 					/* 5 bytes long */
 
 #define ULEN	29 /* length of usage string is 29 bytes */
 

@@ -35,25 +35,56 @@ int main(int argc, char** argv)
 	/* start of communication loop */
 	int newclientfd = accept(cmdsockfd, (struct sockaddr*) &client_addr, &clientlen);
 		error(newclientfd, "server: main(): accept()");
+	
 	/* now we fork for concurrency */
-	/**************** TESTNG *************************/
 	packet_t* P = recvcmd(newclientfd);
-	printpkt(P);
+		printpkt(P);
+	/* send client ok packet */
+	packet_t* OK = cmdpkt(newclientfd, "OKAY", "Command OK", 10, 200);
+	sendcmd(newclientfd, OK);
+	
 	/* get client IP and port info */
 	struct sockaddr_in clientdata;
 	bzero((char*) &clientdata, sizeof clientdata);
 	clientlen	= parseport(P, &clientdata);
-	printf("%s %d %d\n", inet_ntoa(clientdata.sin_addr), ntohs(clientdata.sin_port), clientlen);
+	
 	/* create socket to send client data */
 	datasockfd = setsocket();
+	
 	/* connect to client */
-	printf("Trying to connect to client\n");
 	status = connect(datasockfd, (struct sockaddr*) &clientdata, clientlen);
 		error(status, "server: main(): connect()");
-	printf("server connected!");
-	/* we now begin the process of the file transfer */
-	/************************************************/
 	
+	/* we now begin the process of the file transfer */
+	int bytes;
+	char buf[MAXPAY];
+	
+	/* wait for a command from the client */
+	while(TRUE)
+	{
+		P = recvcmd(newclientfd);
+		
+		/* check if there is a valid command */
+		if(strncmp(P->cmd, "QUIT", CMDLEN) == 0)
+		{
+			/* make sure client closed connections */
+			bytes = read(newclientfd, buf, MAXPAY);
+			if(bytes == 0)
+				break;
+		} 
+		else if(strncmp(P->cmd, "LIST", CMDLEN) == 0)
+		{
+		/**************** TESTNG *************************/
+			printf("got LIST\n");
+			/* try to list files */
+			printpkt(P);
+			sendcmd(newclientfd, OK);
+		}
+		/************************************************/
+	
+	}
+	
+	/* close all connections */
 	close(cmdsockfd);
 	close(newclientfd);
 	return EXIT_SUCCESS;

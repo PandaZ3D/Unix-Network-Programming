@@ -62,6 +62,10 @@ packet_t* cmdpkt(int socketfd, char* cmd, char* args, uint8_t arglen, uint8_t st
 			error(status, "cmdpkt: getsockname()");
 		
 		printf("%s %d %d\n", inet_ntoa(my_addr.sin_addr), ntohs(my_addr.sin_port), len);
+		printf("");
+		printf("");
+		printf("");
+		printf("");
 		
 		uint16_t port = ntohs(my_addr.sin_port);
 		uint32_t ip = ntohl(my_addr.sin_addr.s_addr);
@@ -102,7 +106,9 @@ packet_t* cmdpkt(int socketfd, char* cmd, char* args, uint8_t arglen, uint8_t st
 		int left = MAXARG - bytes;
 		memset(P->arg + left, 0, left);
 	}
-	
+	else{
+		memcpy(P->cmd, cmd, CMDLEN);
+	}
 	/* genericc packet assignments */
 	memcpy(&P->status, &status, 1);
 	if(args != NULL)
@@ -121,11 +127,13 @@ void sendcmd(int socketfd, packet_t* cmd)
 {
 	int expected = sizeof(packet_t);
 	int bytes = 0, sent = 0;
+	printf("before send\n");
 	do {
 		bytes = write(socketfd, cmd, sizeof(packet_t));
 			error(bytes, "sendcmd(): write()");
 		sent += bytes;
 	} while(sent < expected && bytes > 0);
+	printf("after send\n");
 }
 
 /* returns packet buffered in socket */
@@ -134,12 +142,13 @@ packet_t* recvcmd(int socketfd)
 	packet_t* P = malloc(sizeof(packet_t));
 	int expected = sizeof(packet_t);
 	int recv = 0, bytes = 0;
+	printf("before read\n");
 	do {
 		bytes = read(socketfd, P, sizeof(packet_t));
 			error(bytes, "sendcmd(): write()");
 		recv += bytes;
 	} while(recv < expected && bytes > 0);
-	
+	printf("after read\n");
 	return P;
 }
 
@@ -207,7 +216,6 @@ socklen_t parseport(packet_t* P, struct sockaddr_in* ret_addr)
 	socklen_t len = sizeof new_addr;
 	memcpy(ret_addr, &new_addr, len);
 	
-	printf("%s %d %d\n", inet_ntoa(new_addr.sin_addr), ntohs(new_addr.sin_port), len);
 	return len;
 }
 

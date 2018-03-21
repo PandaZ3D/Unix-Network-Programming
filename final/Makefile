@@ -26,7 +26,7 @@ src/$(CLIENT).o : src/$(FTPF).o
 	$(CC) -c $(CFLAGS) src/$(CLIENT).c $(DEV) -o $@
 #----------------------------------------------------------------------------
 $(SERVER) : src/$(SERVER).o
-	$(CC) -o bin/$(SERVER) src/$(FTPF).o src/$(SERVER).o
+	$(CC) -o bin/$(SERVER) src/$(FTPF).o src/$(SERVER).o $(LFLAGS)
 
 src/$(SERVER).o : src/$(FTPF).o
 	$(CC) -c $(CFLAGS) src/$(SERVER).c $(DEV) -o $@
