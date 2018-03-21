@@ -39,11 +39,13 @@ int main(int argc, char** argv)
 	/* client opens up both command channel socket and data socket */
 	int cmdsockfd = setsocket();
 	/* open data socket that will listen for server's connection */
-	int datasockfd = listensocket(portno);
+	int datasockfd = listensocket(INADDR_ANY);
 	
 	/* main part of program where client contacts server */
 	int status = connect(cmdsockfd, (struct sockaddr*) &server_addr, serverlen);
 		error(status, "client: main(): connect()");
+	
+	exit(1);
 	
 	/**************** TESTNG *************************/
 	char buf[20];

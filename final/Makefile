@@ -15,7 +15,7 @@ LFLAGS = -lreadline
 
 FTPF = ftp
 
-DEV = -Wno-unused-variable
+DEV = #-Wno-unused-variable
 
 all : $(CLIENT) $(SERVER)
 #-----------------------------------------------------------------------------
@@ -45,3 +45,4 @@ cleanc :
 
 clean: cleans cleanc
 
+re: clean all

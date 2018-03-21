@@ -10,7 +10,8 @@ int setsocket(void)
 		int socketoption = 1;
 			setsockopt(socketfd, SOL_SOCKET, SO_REUSEADDR, 
 				(const void *)&socketoption , sizeof(int));
-				
+			error(socketoption, "setsocket(): setsockopt()");
+			
 		return socketfd;
 }
 
@@ -27,14 +28,14 @@ int listensocket(int portno)
 	my_addr.sin_port = htons(portno);
 	my_addr.sin_addr.s_addr = htonl(INADDR_ANY);
 	socklen_t addrlen = sizeof my_addr;
-	
-	/*  set listeneing options */
-	int status = listen(listenfd, LISTENQ);
-		error(status, "listensocekt(): listen()");
 		
 	/* bind adrress to get connections */
-	status = bind(listenfd, (struct sockaddr*) &my_addr, addrlen);
+	int status = bind(listenfd, (struct sockaddr*) &my_addr, addrlen);
 		error(status, "listensocket():  bind()");
+	
+	/*  set listeneing options */
+	status = listen(listenfd, LISTENQ);
+		error(status, "listensocekt(): listen()");
 		
 	return listenfd;
 }

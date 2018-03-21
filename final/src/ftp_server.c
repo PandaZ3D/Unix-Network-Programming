@@ -24,13 +24,14 @@ int main(int argc, char** argv)
 	/* get the server port number of server */
 	int portno = atoi(argv[PORT]);
 
-	/* set up server IP information */
+	/* set up server IP information
 	struct sockaddr_in server_addr;
 	bzero((char*) &server_addr, sizeof server_addr);
 	server_addr.sin_family = AF_INET;
 	server_addr.sin_port = htons(portno);
 	server_addr.sin_addr.s_addr = inet_addr(INADDR_ANY);
 	socklen_t serverlen = sizeof server_addr;
+	*/
 	
 	/* client opens up both command channel socket and data socket */
 	int cmdsockfd = listensocket(portno);
@@ -40,7 +41,10 @@ int main(int argc, char** argv)
 	socklen_t clientlen = sizeof client_addr;
 	
 	int newclientfd = accept(cmdsockfd, (struct sockaddr*) &client_addr, &clientlen);
-
+	
+	printf("got new connection!\n");
+	
+	exit(1);
     /**************** TESTNG *************************/
 	char buf[20], buf2[20];
 	int bytes = sprintf(buf2, "hello");
