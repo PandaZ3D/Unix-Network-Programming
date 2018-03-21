@@ -45,8 +45,6 @@ int main(int argc, char** argv)
 	int status = connect(cmdsockfd, (struct sockaddr*) &server_addr, serverlen);
 		error(status, "client: main(): connect()");
 	
-	exit(1);
-	
 	/**************** TESTNG *************************/
 	char buf[20];
 	int bytes = sprintf(buf, "hi");
@@ -54,12 +52,15 @@ int main(int argc, char** argv)
 	
 	bytes = write(cmdsockfd, buf, bytes + 1);
 		error(bytes, "write()");
-
+	
+	do{	
 	bytes = read(cmdsockfd, buf, 20);
 		error(bytes, "write()");
 		
 	buf[bytes] = 0;
 	printf("recvd: %s\n", buf);
+	
+	}while(bytes>0);
 	/************************************************/
 	
 	/* create PORT packet and sent IP:PORT to server */
