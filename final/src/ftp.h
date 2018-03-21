@@ -4,8 +4,8 @@
 
 #include "netlib.h"
 
-#define USAGE		"ftp> <client-cmd> [<cmd-arg>]" 	/* 29 bytes long */
-#define UTERM		"ftp>" 											/* 4 bytes long */
+#define USAGE	"ftp> <client-cmd> [<cmd-arg>]" 	/* 29 bytes long */
+#define UTERM	"ftp>" 					/* 4 bytes long */
 
 #define ULEN	29 /* length of usage string is 29 bytes */
 
@@ -13,17 +13,17 @@
 #define MAXPAY	512
 
 /* pkt struct macros */
-#define CMDLEN	4 		/* command length in bytes */
+#define CMDLEN	4 	/* command length in bytes */
 #define MAXARG	255 	/* max length of args */
 #define PKTSIZE	(2 + (CMDLEN) + (MAXARG))
 
 /* packet structure definition */
 typedef struct __attribute__ ((packed)) 
 {
-		char cmd[CMDLEN]; 		/* 4 bytes		: cmd */
-		uint8_t status;				/* 1 byte 		: [reply status code] */
-		uint8_t arglen;				/* 1 byte 		: [length of args] */
-		char arg[MAXARG];		/* 255 bytes : [cmd message] */
+		char cmd[CMDLEN]; 		/* 4 bytes	: cmd */
+		uint8_t status;			/* 1 byte 	: [reply status code] */
+		uint8_t arglen;			/* 1 byte	: [length of args] */
+		char arg[MAXARG];		/* 255 bytes 	: [cmd message] */
 } packet_t;
 
 /* returns a generic TCP socket with custum options for debugging */
