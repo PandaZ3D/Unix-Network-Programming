@@ -15,7 +15,7 @@ LFLAGS = -lreadline
 
 FTPF = ftp
 
-DEV = #-Wno-unused-variable
+DEV = -Wno-format-zero-length #-Wno-unused-variable
 
 all : $(CLIENT) $(SERVER)
 #-----------------------------------------------------------------------------
@@ -29,10 +29,10 @@ $(SERVER) : src/$(SERVER).o
 	$(CC) -o bin/$(SERVER) src/$(FTPF).o src/$(SERVER).o
 
 src/$(SERVER).o : src/$(FTPF).o
-	$(CC) -c $(CFLAGS) src/$(SERVER).c -o $@
+	$(CC) -c $(CFLAGS) src/$(SERVER).c $(DEV) -o $@
 #----------------------------------------------------------------------------
 src/$(FTPF).o :
-	$(CC) -c $(CFLAGS) src/$(FTPF).c -o $@
+	$(CC) -c $(CFLAGS) src/$(FTPF).c $(DEV) -o $@
 #----------------------------------------------------------------------------
 check :
 	valgrind --leak-check=full bin/$(SERVER)

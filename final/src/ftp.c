@@ -167,9 +167,9 @@ int recvfile(int socketfd)
 
 
 /* function to do port calculation, returns struct with info */
-struct sockaddr_in* parseport(packet_t* P)
+socklen_t parseport(packet_t* P, struct sockaddr_in* ret_addr)
 {
-	struct sockaddr_in* new_addr = malloc(sizeof(struct sockaddr_in));
+	struct sockaddr_in new_addr;
 	char* info = strndup(P->arg, strnlen(P->arg, MAXARG));
 	char *tok;
 	uint8_t n[6] , i = 0;
@@ -197,11 +197,14 @@ struct sockaddr_in* parseport(packet_t* P)
 	port += (256 * n[4]) + n[5];
 	
 	/* make the client address */
-	new_addr->sin_family = AF_INET;
-	new_addr->sin_port=  port;
-	new_addr->sin_addr.s_addr = ip;
+	new_addr.sin_family = AF_INET;
+	new_addr.sin_port=  port;
+	new_addr.sin_addr.s_addr = ip;
 	
-	return new_addr;
+	socklen_t len = sizeof new_addr;
+	memcpy(ret_addr, &new_addr, len);
+	
+	return len;
 }
 
 /* frees allocated packet struct */

@@ -51,12 +51,12 @@ int main(int argc, char** argv)
 	
 	/* client sends PORT packet to initialize connection */
 	sendcmd(cmdsockfd, P);
-		free(P);
 		
 	/* client now waits for server's connection to thier data port */
+	printf("Waiting for server\n");
 	bzero((char*) &server_addr, sizeof server_addr);
-	socklen_t serverlen = sizeof server_addr;
-	int datasockfd = accept(datasockfd, (struct sockaddr*) &server_addr, serverlen);
+	serverlen = sizeof server_addr;
+	int datasockfd = accept(serverfd, (struct sockaddr*) &server_addr, &serverlen);
 		error(datasockfd, "client: main(): accept()");
 	
 	printf("recv'd server connection\n");
