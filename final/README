@@ -8,8 +8,21 @@ Synopsis: make a simple ftp client/server
 
 Approach:
 
+First wrote out plan for what funtions I would need to implement this ftp server.
+Then I started to make a library to implement just this. I created a packet struct
+to be sent over the network. This was used for commands. 
+
 Problems:
+
+I cannot sent files but my library had implemented functionality of packets
+ackknolwdgements and other things related to that.
+
+Application cannot transfer files.
 
 Known bugs:
 
-References:
+Some of my functions and connections oddlt enough don't work without certain print
+statements, it is rather odd. And as of now my client has a set Port number, if
+I use wildcard 0 then I get an error. But if I use the exact port number printed on my terminal
+then it works magically.
+

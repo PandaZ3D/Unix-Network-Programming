@@ -127,13 +127,11 @@ void sendcmd(int socketfd, packet_t* cmd)
 {
 	int expected = sizeof(packet_t);
 	int bytes = 0, sent = 0;
-	printf("before send\n");
 	do {
 		bytes = write(socketfd, cmd, sizeof(packet_t));
 			error(bytes, "sendcmd(): write()");
 		sent += bytes;
 	} while(sent < expected && bytes > 0);
-	printf("after send\n");
 }
 
 /* returns packet buffered in socket */
@@ -142,38 +140,75 @@ packet_t* recvcmd(int socketfd)
 	packet_t* P = malloc(sizeof(packet_t));
 	int expected = sizeof(packet_t);
 	int recv = 0, bytes = 0;
-	printf("before read\n");
 	do {
 		bytes = read(socketfd, P, sizeof(packet_t));
 			error(bytes, "sendcmd(): write()");
 		recv += bytes;
 	} while(recv < expected && bytes > 0);
-	printf("after read\n");
 	return P;
 }
 
 /* sends a chunk of data, returns amount of bytes sent */
-int sendchunk(int socketfd, char* chunk)
+int sendchunk(int socketfd, char* chunk, int size)
 {
+	int bytes = 0, sent = 0;
+	do {
+		bytes = write(socketfd, chunk, size);
+			error(bytes, "sendchunk(): write()");
+		sent += bytes;
+		printf("sent: %d bytes\n", sent);
+	} while(sent < size);
 	return 0;
 }
 
 /* recieves a chunk of data, returns pointer to chunk */
-char* recvchunk(int socketfd)
+int recvchunk(int socketfd, char* chunk)
 {
-	return NULL;
+	int readb = 0, bytes = 0, off = 0;
+	do {
+		bytes = read(socketfd, chunk + off, MAXPAY);
+			error(bytes, "sendfile(): read()");
+		readb += bytes;
+		off += bytes;
+	} while(readb < MAXPAY && off < (MAXPAY-1) && bytes < 0);
+	
+	return readb;
 }
 
 /* sends a whole file, returns bytes sent */
 int sendfile(int socketfd, int putfd)
 {
-		return 0;
+	int readb = 0, bytes = 0, sent = 0;
+	char* buf = malloc(sizeof(char) * (MAXPAY + 1));
+	do {
+		bytes = read(putfd, buf, MAXPAY);
+			error(bytes, "sendfile(): read()");
+		buf[bytes] = 0;
+		readb += bytes;
+		printf("read: %d bytes\n", readb);
+		sent += sendchunk(socketfd, buf, bytes);
+	} while(bytes > 0);
+	printf("sent total: %d bytes\n", sent);
+	return sent;
 }
 
 /* recieves a whole file, returns bytes recvd */
-int recvfile(int socketfd)
+int recvfile(int socketfd, int getfd)
 {
-		return 0;
+	int wrote = 0, bytes = 0;
+	char* buf = malloc(sizeof(char) * (MAXPAY + 1));
+	do {
+		bytes = recvchunk(socketfd, buf);
+		if(buf == NULL)
+			break;
+		bytes = write(getfd, buf, bytes);
+		wrote += bytes;
+		if(bytes < MAXPAY)
+			break;
+	} while(bytes > 0);
+	free(buf);
+		
+	return wrote;
 }
 
 

@@ -56,7 +56,8 @@ int main(int argc, char** argv)
 		error(status, "server: main(): connect()");
 	
 	/* we now begin the process of the file transfer */
-	int bytes;
+	int bytes, fd;
+	struct stat fdstats;
 	char buf[MAXPAY];
 	
 	/* wait for a command from the client */
@@ -74,12 +75,42 @@ int main(int argc, char** argv)
 		} 
 		else if(strncmp(P->cmd, "LIST", CMDLEN) == 0)
 		{
-		/**************** TESTNG *************************/
-			printf("got LIST\n");
 			/* try to list files */
 			printpkt(P);
 			sendcmd(newclientfd, OK);
+			
+			bytes = sprintf(buf, "%s -I tmp.ftp > tmp.ftp", P->arg);
+			buf[bytes] = 0;
+			system(buf);
+			/* now we send that output file to the client */
+			fd = open("tmp.ftp", O_RDONLY);
+				error(fd, "server main(): open()");
+			 status = fstat(fd, &fdstats);
+				error(status, "server: main(): fstat():");
+			if(fdstats.st_size > 0)
+			{
+				sendcmd(newclientfd, OK);
+				sendfile(datasockfd, fd);
+				// error check how many were sent 
+			} 
+			else{
+				// send error msg 
+				P = cmdpkt(0, "EERR", "501: Syntax Error", 17, 255);
+			}
+		    /**/
+		    
+			/* now we delete the file */
+			bytes = sprintf(buf, "rm -f tmp.file");
+			buf[bytes] = 0;
+			system(buf);
 		}
+		else if (strncmp(P->cmd, "STOR", CMDLEN) == 0)
+		{
+			/* empty-to-be-implemented*/
+		}
+		/**************** TESTNG *************************/
+		
+		
 		/************************************************/
 	
 	}

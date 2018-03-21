@@ -70,6 +70,7 @@ int main(int argc, char** argv)
 		error(datasockfd, "client: main(): accept()");
 	
 	/* now we put up our interface and start the application */
+	int fd, recvd;
 	char *input, prompt[5];
 	snprintf(prompt, sizeof prompt, UTERM);
 	
@@ -104,17 +105,18 @@ int main(int argc, char** argv)
 		} 
 		else if(strncmp(input, "ls", 2) == 0)
 		{
-			printf("found ls\n");
 			/* send list cmd */
 			P = cmdpkt(0, "LIST", input, strlen(input), 0);
 			sendcmd(cmdsockfd, P);
+			fd = 1;
 		}
 		else
 		{
 				/* cmd not supported */
-				
+				fprintf(stderr, "ftp: command not supported: %s\n", input);
+				continue;
 		}
-		/**************** TESTNG *************************/
+		
 		/* wait to recieve okay or error */
 		P = recvcmd(cmdsockfd);
 		
@@ -124,7 +126,12 @@ int main(int argc, char** argv)
 			fprintf(stderr, "%s", R->arg);
 			exit(1);
 		}
-		
+		/**************** TESTNG *************************/
+		/* do something based on cmd specified */
+		else {
+			/* write to stdout fd */
+			recvd = recvfile(datasockfd, fd);
+		}
 		/************************************************/
 		/* Free dynamically memory */
 		free(input);	

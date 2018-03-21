@@ -15,7 +15,7 @@ LFLAGS = -lreadline
 
 FTPF = ftp
 
-DEV = -Wno-format-zero-length #-Wno-unused-variable
+DEV = -Wno-format-zero-length -Wno-unused-variable -Wno-unused-but-set-variable
 
 all : $(CLIENT) $(SERVER)
 #-----------------------------------------------------------------------------

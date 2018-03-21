@@ -37,13 +37,13 @@ void sendcmd(int, packet_t*);
 /* returns packet buffered in socket */
 packet_t* recvcmd(int);
 /* sends a chunk of data, returns amount of bytes sent */
-int sendchunk(int, char*);
+int sendchunk(int, char*, int);
 /* recieves a chunk of data, returns pointer to chunk */
-char* recvchunk(int);
+int recvchunk(int, char*);
 /* sends a whole file, returns bytes sent */
 int sendfile(int, int); 
 /* recieves a whole file, returns bytes recvd */
-int recvfile(int);
+int recvfile(int, int);
 /* function to do port calculation, returns struct with info */
 socklen_t parseport(packet_t*, struct sockaddr_in*);
 /* frees allocated packet struct */
